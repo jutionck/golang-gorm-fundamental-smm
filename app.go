@@ -1,34 +1,39 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"enigmacamp.com/golang-gorm/config"
+	"enigmacamp.com/golang-gorm/model"
+	"enigmacamp.com/golang-gorm/repository"
+	"github.com/jutionck/generate-id"
+	"log"
 )
 
 func main() {
-	dbHost := "localhost"
-	dbPort := "5432"
-	dbUser := "postgres"
-	dbPassword := ""
-	dbName := "db_enigma_shop_v2"
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", dbHost, dbUser, dbPassword, dbName, dbPort)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	enigmaDb, err := db.DB()
-	defer func(enigmaDb *sql.DB) {
-		err := enigmaDb.Close()
+	cfg := config.NewConfig()
+	db := cfg.DbConn()
+	defer func(cfg *config.Config) {
+		err := cfg.DbClose()
 		if err != nil {
-			panic(err)
+			log.Println(err.Error())
 		}
+	}(&cfg)
+	//err := db.AutoMigrate(&model.Customer{})
+	//if err != nil {
+	//	return
+	//}
 
-	}(enigmaDb)
-	err = db.AutoMigrate(&Customer{})
+	repo := repository.NewCustomerRepository(db)
+
+	// Insert
+	customer := model.Customer{
+		Id:      generateid.GenerateId(),
+		Name:    "Bulan Bintang",
+		Phone:   "829202002",
+		Email:   "bulan.bintang@gmail.com",
+		Balance: 10000,
+	}
+	err := repo.Create(&customer)
 	if err != nil {
-		return
+		log.Println(err.Error())
 	}
 }

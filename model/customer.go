@@ -1,4 +1,4 @@
-package main
+package model
 
 type Customer struct {
 	Id        string `gorm:"primaryKey"`
