@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func main() {
@@ -28,10 +27,8 @@ func main() {
 		}
 
 	}(enigmaDb)
-	err = enigmaDb.Ping()
+	err = db.AutoMigrate(&Customer{})
 	if err != nil {
-		panic(err)
-	} else {
-		log.Println("Connected...")
+		return
 	}
 }
