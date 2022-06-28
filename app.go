@@ -4,7 +4,6 @@ import (
 	"enigmacamp.com/golang-gorm/config"
 	"enigmacamp.com/golang-gorm/model"
 	"enigmacamp.com/golang-gorm/repository"
-	generateid "github.com/jutionck/generate-id"
 	"log"
 )
 
@@ -20,29 +19,30 @@ func main() {
 	repo := repository.NewCustomerRepository(db)
 
 	//Insert
-	customer := model.Customer{
-		Id:      generateid.GenerateId(),
-		Name:    "Rifqi Puasa",
-		Address: "Depok",
-		Phone:   "28299292",
-		Email:   "rifqi.puasa@gmail.com",
-		Balance: 10000,
-	}
-	err := repo.Create(&customer)
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	// Update
-	//customerExisting := model.Customer{
-	//	Id: "64ef0857-a08e-4a62-8eda-4e24c6aef326",
+	//customer := model.Customer{
+	//	Id:      generateid.GenerateId(),
+	//	Name:    "Rifqi Puasa",
+	//	Address: "Depok",
+	//	Phone:   "28299292",
+	//	Email:   "rifqi.puasa@gmail.com",
+	//	Balance: 10000,
 	//}
-	//err := repo.Update(&customerExisting, model.Customer{
-	//	Address: "",
-	//	Balance: 150000,
-	//})
+	//err := repo.Create(&customer)
 	//if err != nil {
 	//	log.Println(err.Error())
 	//}
+
+	// Update
+	customerExisting := model.Customer{
+		Id: "51999e87-9634-4a37-935f-99bf6851adf9",
+	}
+	err := repo.Update(&customerExisting, map[string]interface{}{
+		"address":   "",
+		"balance":   15000,
+		"is_status": 0,
+	})
+	if err != nil {
+		log.Println(err.Error())
+	}
 
 }
