@@ -7,10 +7,16 @@ import (
 
 type CustomerRepository interface {
 	Create(customer *model.Customer) error
+	Update(customer *model.Customer, by model.Customer) error
 }
 
 type customerRepository struct {
 	db *gorm.DB
+}
+
+func (c *customerRepository) Update(customer *model.Customer, by model.Customer) error {
+	result := c.db.Model(customer).Updates(by).Error
+	return result
 }
 
 func (c *customerRepository) Create(customer *model.Customer) error {

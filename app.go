@@ -4,7 +4,7 @@ import (
 	"enigmacamp.com/golang-gorm/config"
 	"enigmacamp.com/golang-gorm/model"
 	"enigmacamp.com/golang-gorm/repository"
-	"github.com/jutionck/generate-id"
+	generateid "github.com/jutionck/generate-id"
 	"log"
 )
 
@@ -17,23 +17,32 @@ func main() {
 			log.Println(err.Error())
 		}
 	}(&cfg)
-	//err := db.AutoMigrate(&model.Customer{})
-	//if err != nil {
-	//	return
-	//}
-
 	repo := repository.NewCustomerRepository(db)
 
-	// Insert
+	//Insert
 	customer := model.Customer{
 		Id:      generateid.GenerateId(),
-		Name:    "Bulan Bintang",
-		Phone:   "829202002",
-		Email:   "bulan.bintang@gmail.com",
+		Name:    "Rifqi Puasa",
+		Address: "Depok",
+		Phone:   "28299292",
+		Email:   "rifqi.puasa@gmail.com",
 		Balance: 10000,
 	}
 	err := repo.Create(&customer)
 	if err != nil {
 		log.Println(err.Error())
 	}
+
+	// Update
+	//customerExisting := model.Customer{
+	//	Id: "64ef0857-a08e-4a62-8eda-4e24c6aef326",
+	//}
+	//err := repo.Update(&customerExisting, model.Customer{
+	//	Address: "",
+	//	Balance: 150000,
+	//})
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+
 }
