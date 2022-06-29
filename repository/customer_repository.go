@@ -16,7 +16,7 @@ type CustomerRepository interface {
 	FindFirstBy(by map[string]interface{}) (model.Customer, error)   // where column = ? limit 1
 	FindAllBy(by map[string]interface{}) ([]model.Customer, error)   // where column = ?
 	FindBy(by string, vals ...interface{}) ([]model.Customer, error) // where column like ?
-	FindFirstWithPreload(by map[string]interface{}, preload string) (interface{}, error)
+	FindFirstWithPreload(by map[string]interface{}, preload string) (model.Customer, error)
 	BaseRepositoryAggregation
 	BaseRepositoryPaging
 }
@@ -25,7 +25,7 @@ type customerRepository struct {
 	db *gorm.DB
 }
 
-func (c *customerRepository) FindFirstWithPreload(by map[string]interface{}, preload string) (interface{}, error) {
+func (c *customerRepository) FindFirstWithPreload(by map[string]interface{}, preload string) (model.Customer, error) {
 	var customer model.Customer
 	result := c.db.Preload(preload).Where(by).First(&customer)
 	if err := result.Error; err != nil {
