@@ -17,12 +17,18 @@ type CustomerRepository interface {
 	FindAllBy(by map[string]interface{}) ([]model.Customer, error)   // where column = ?
 	FindBy(by string, vals ...interface{}) ([]model.Customer, error) // where column like ?
 	FindFirstWithPreload(by map[string]interface{}, preload string) (model.Customer, error)
+	OpenProductForExistingCustomer(customerWithProduct *model.Customer) error
 	BaseRepositoryAggregation
 	BaseRepositoryPaging
 }
 
 type customerRepository struct {
 	db *gorm.DB
+}
+
+func (c *customerRepository) OpenProductForExistingCustomer(customerWithProduct *model.Customer) error {
+	result := c.db.Model(&customerWithProduct).Updates(customerWithProduct).Error
+	return result
 }
 
 func (c *customerRepository) FindFirstWithPreload(by map[string]interface{}, preload string) (model.Customer, error) {

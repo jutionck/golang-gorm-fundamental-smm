@@ -2,59 +2,88 @@ package main
 
 import (
 	"enigmacamp.com/golang-gorm/config"
-	"golang.org/x/crypto/bcrypt"
+	"enigmacamp.com/golang-gorm/model"
+	"enigmacamp.com/golang-gorm/repository"
+	"fmt"
 	"log"
 )
 
 func main() {
 	cfg := config.NewConfig()
-	cfg.DbConn()
+	db := cfg.DbConn()
 	defer func(cfg *config.Config) {
 		err := cfg.DbClose()
 		if err != nil {
 			log.Println(err.Error())
 		}
 	}(&cfg)
-
-	//repo := repository.NewCustomerRepository(db)
-	//pass, _ := HashPassword("password")
-	//customer01 := model.Customer{
-	//	Id:             generateid.GenerateId(),
-	//	Name:           "Fadli Zona Nyaman",
-	//	Phone:          "14045",
-	//	Email:          "orderaja@gmail.com",
-	//	Balance:        5000,
-	//	UserCredential: model.UserCredential{UserName: "fadlizone", Password: pass},
-	//	Address: []model.Address{
-	//		{
-	//			StreetName: "Jl Nin Aja",
-	//			City:       "Bogor",
-	//			PostalCode: "123",
-	//		},
-	//		{
-	//			StreetName: "Jl Terus",
-	//			City:       "Bandung",
-	//			PostalCode: "456",
-	//		},
+	productRepo := repository.NewProductRepository(db)
+	customerRepo := repository.NewCustomerRepository(db)
+	//
+	//product01 := []model.Product{
+	//	{
+	//		ProductName: "Kacang Asin",
+	//	},
+	//	{
+	//		ProductName: "Keripik Mangga",
+	//	},
+	//	{
+	//		ProductName: "Keripik Pisang",
 	//	},
 	//}
-	//err := repo.Create(&customer01)
-	//isError(err)
-	//customer02, err := repo.FindFirstWithPreload(
-	//	map[string]interface{}{"id": "e439f380-20e9-41b8-aa95-0db32456e22f"},
-	//	"UserCredential",
-	//)
-	//isError(err)
-	//log.Println(customer02.ToString())
+	//err := productRepo.Create(&product01[2])
+	//IsError(err)
+
+	//passwordHash, _ := utils.HashPassword("password")
+	//customer01 := model.Customer{
+	//	Id:   generateid.GenerateId(),
+	//	Name: "Bulan Bintang",
+	//	Address: []model.Address{
+	//		{
+	//			StreetName: "Jl Jalan Aja",
+	//			City:       "Ragunan",
+	//			PostalCode: "12345",
+	//		},
+	//	},
+	//	Phone:   "102030",
+	//	Email:   "bulan.bintang@gmail.com",
+	//	Balance: 10000,
+	//	UserCredential: model.UserCredential{
+	//		UserName: "bulanbintang",
+	//		Password: passwordHash,
+	//	},
+	//}
+	//err := customerRepo.Create(&customer01)
+	//IsError(err)
+
+	// Save Many To Many
+	product01, err := productRepo.FindById(2)
+	product02, _ := productRepo.FindById(3)
+	product03, _ := productRepo.FindById(4)
+	customer01, err := customerRepo.FindById("8dad3fac-4c6e-4e9a-9053-7c93f9806cd1")
+	IsError(err)
+	fmt.Println(product01.ToString())
+
+	err = customerRepo.OpenProductForExistingCustomer(&model.Customer{
+		Id: customer01.Id,
+		Products: []model.Product{
+			{
+				ID: product01.ID,
+			},
+			{
+				ID: product02.ID,
+			},
+			{
+				ID: product03.ID,
+			},
+		},
+	})
+	IsError(err)
+
 }
 
-func isError(err error) {
+func IsError(err error) {
 	if err != nil {
 		log.Println(err.Error())
 	}
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
 }
