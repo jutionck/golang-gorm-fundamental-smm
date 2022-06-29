@@ -2,8 +2,10 @@ package main
 
 import (
 	"enigmacamp.com/golang-gorm/config"
+	"enigmacamp.com/golang-gorm/model"
 	"enigmacamp.com/golang-gorm/repository"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -18,125 +20,61 @@ func main() {
 	}(&cfg)
 	repo := repository.NewCustomerRepository(db)
 
-	//Insert
-	//customer := model.Customer{
+	// Insert Customer
+	//password, _ := HashPassword("password")
+	//customer01 := model.Customer{
 	//	Id:      generateid.GenerateId(),
-	//	Name:    "Jamal Udin",
-	//	Address: "Surabya",
-	//	Phone:   "2929022",
-	//	Email:   "jamal.udin@gmail.com",
-	//	Balance: 10000,
+	//	Name:    "Bulan Sutisna",
+	//	Address: "Bali",
+	//	Balance: 20000,
+	//	UserCredential: model.UserCredential{
+	//		UserName: "bulanbulanan",
+	//		Password: password,
+	//	},
+	//	Email: "bulan.s@gmail.com",
+	//	Phone: "20202020",
 	//}
-	//err := repo.Create(&customer)
+	//repo.Create(&customer01)
+
+	// Update Existing
+	//customer02 := model.Customer{
+	//	Id: "f349932f-5aa8-45d2-b6b3-b78bc4b1e213",
+	//}
+	//customer02, err := repo.FindById(customer02.Id)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("FindById: ", customer02)
+	//userCredential01 := model.UserCredential{
+	//	UserName: "bulansehatsehatya",
+	//	Password: "password",
+	//}
+	//customer02.UserCredential = userCredential01
+	//err = repo.UpdateBy(&customer02)
 	//if err != nil {
 	//	log.Println(err.Error())
 	//}
 
-	//customerExisting := model.Customer{
-	//	Id: "0454ad0e-e6f2-4566-a6f5-6cafb8b02e26",
-	//}
-	//err := repo.Update(&customerExisting, map[string]interface{}{
-	//	"address":   "",
-	//	"balance":   15000,
-	//	"is_status": 0,
-	//})
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-
-	// Delete
-	//err := repo.Delete(&customerExisting)
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-
-	// Find By Id
-	//customerExisting, err := repo.FindById(customerExisting.Id)
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println(customerExisting)
-
-	// FindByAllBy
-	//customers := []model.Customer{}
-	//customers, err := repo.FindAllBy(map[string]interface{}{
-	//	"address": "Depok",
-	//})
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("FindByAllBy: ", customers)
-
-	// FindFirstBy
-	//customer := model.Customer{}
-	//customer, err = repo.FindFirstBy(map[string]interface{}{
-	//	"address": "Depok",
-	//})
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("FindFirstBy: ", customer)
-
-	// FindBy
-	//customers01 := []model.Customer{}
-	//customers01, err = repo.FindBy("name LIKE ? AND is_status = ?", "%J%", 1)
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("FindBy: ", customers01)
-
-	// Count
-	var TotalCustomerStatus []struct {
-		Name     string
-		IsStatus int
-		Total    int64
-	}
-	err := repo.Count(&TotalCustomerStatus, "is_status")
+	// Update with Preload
+	customer02, err := repo.FindFirstWithPreload(map[string]interface{}{"id": "f349932f-5aa8-45d2-b6b3-b78bc4b1e213"}, "UserCredential")
 	if err != nil {
 		log.Println(err.Error())
 	}
-	fmt.Println("Result for TotalCustomerStatus")
-	fmt.Println(TotalCustomerStatus)
-
-	var total int64
-	err = repo.Count(&total, "")
+	fmt.Println("Before: ", customer02)
+	c := customer02.(model.Customer)
+	c.UserCredential.Password = "rahasianegara"
+	err = repo.UpdateBy(&c)
 	if err != nil {
 		log.Println(err.Error())
 	}
-	fmt.Println("Result for total")
-	fmt.Println(total)
+	customer02, err = repo.FindFirstWithPreload(map[string]interface{}{"id": "f349932f-5aa8-45d2-b6b3-b78bc4b1e213"}, "UserCredential")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	fmt.Println("After: ", customer02)
+}
 
-	// Group By
-	//var Result []struct {
-	//	IsStatus int
-	//	Total    int64
-	//}
-	//
-	//var Result02 []struct {
-	//	Address string
-	//	Total   int64
-	//}
-	//
-	//err = repo.GroupBy(&Result, "is_status, count(is_status) as total", nil, "is_status")
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("Result for is_status")
-	//fmt.Println(Result)
-	//
-	//err = repo.GroupBy(&Result02, "address, count(address) as total", nil, "address")
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("Result for address")
-	//fmt.Println(Result02)
-	//
-	//// Paging
-	//customerPaging, err := repo.Paging(1, 3)
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
-	//fmt.Println("Result for customerPaging")
-	//fmt.Println(customerPaging)
-
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	return string(bytes), err
 }

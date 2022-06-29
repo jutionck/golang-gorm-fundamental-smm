@@ -10,17 +10,37 @@ import (
 type CustomerRepository interface {
 	Create(customer *model.Customer) error
 	Update(customer *model.Customer, by map[string]interface{}) error
+	UpdateBy(existingCustomer *model.Customer) error
 	Delete(customer *model.Customer) error
 	FindById(id string) (model.Customer, error)
 	FindFirstBy(by map[string]interface{}) (model.Customer, error)   // where column = ? limit 1
 	FindAllBy(by map[string]interface{}) ([]model.Customer, error)   // where column = ?
 	FindBy(by string, vals ...interface{}) ([]model.Customer, error) // where column like ?
+	FindFirstWithPreload(by map[string]interface{}, preload string) (interface{}, error)
 	BaseRepositoryAggregation
 	BaseRepositoryPaging
 }
 
 type customerRepository struct {
 	db *gorm.DB
+}
+
+func (c *customerRepository) FindFirstWithPreload(by map[string]interface{}, preload string) (interface{}, error) {
+	var customer model.Customer
+	result := c.db.Preload(preload).Where(by).First(&customer)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return customer, nil
+		} else {
+			return customer, err
+		}
+	}
+	return customer, nil
+}
+
+func (c *customerRepository) UpdateBy(existingCustomer *model.Customer) error {
+	result := c.db.Session(&gorm.Session{FullSaveAssociations: true}).Save(existingCustomer).Error
+	return result
 }
 
 func (c *customerRepository) Count(result interface{}, groupBy string) error {
