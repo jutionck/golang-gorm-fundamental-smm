@@ -2,7 +2,6 @@ package main
 
 import (
 	"enigmacamp.com/golang-gorm/config"
-	"enigmacamp.com/golang-gorm/model"
 	"enigmacamp.com/golang-gorm/repository"
 	"fmt"
 	"log"
@@ -59,30 +58,85 @@ func main() {
 	//fmt.Println(customerExisting)
 
 	// FindByAllBy
-	customers := []model.Customer{}
-	customers, err := repo.FindAllBy(map[string]interface{}{
-		"address": "Depok",
-	})
-	if err != nil {
-		log.Println(err.Error())
-	}
-	fmt.Println("FindByAllBy: ", customers)
+	//customers := []model.Customer{}
+	//customers, err := repo.FindAllBy(map[string]interface{}{
+	//	"address": "Depok",
+	//})
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("FindByAllBy: ", customers)
 
 	// FindFirstBy
-	customer := model.Customer{}
-	customer, err = repo.FindFirstBy(map[string]interface{}{
-		"address": "Depok",
-	})
-	if err != nil {
-		log.Println(err.Error())
-	}
-	fmt.Println("FindFirstBy: ", customer)
+	//customer := model.Customer{}
+	//customer, err = repo.FindFirstBy(map[string]interface{}{
+	//	"address": "Depok",
+	//})
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("FindFirstBy: ", customer)
 
 	// FindBy
-	customers01 := []model.Customer{}
-	customers01, err = repo.FindBy("name LIKE ? AND is_status = ?", "%J%", 1)
+	//customers01 := []model.Customer{}
+	//customers01, err = repo.FindBy("name LIKE ? AND is_status = ?", "%J%", 1)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("FindBy: ", customers01)
+
+	// Count
+	var TotalCustomerStatus []struct {
+		Name     string
+		IsStatus int
+		Total    int64
+	}
+	err := repo.Count(&TotalCustomerStatus, "is_status")
 	if err != nil {
 		log.Println(err.Error())
 	}
-	fmt.Println("FindBy: ", customers01)
+	fmt.Println("Result for TotalCustomerStatus")
+	fmt.Println(TotalCustomerStatus)
+
+	var total int64
+	err = repo.Count(&total, "")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	fmt.Println("Result for total")
+	fmt.Println(total)
+
+	// Group By
+	//var Result []struct {
+	//	IsStatus int
+	//	Total    int64
+	//}
+	//
+	//var Result02 []struct {
+	//	Address string
+	//	Total   int64
+	//}
+	//
+	//err = repo.GroupBy(&Result, "is_status, count(is_status) as total", nil, "is_status")
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("Result for is_status")
+	//fmt.Println(Result)
+	//
+	//err = repo.GroupBy(&Result02, "address, count(address) as total", nil, "address")
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("Result for address")
+	//fmt.Println(Result02)
+	//
+	//// Paging
+	//customerPaging, err := repo.Paging(1, 3)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//fmt.Println("Result for customerPaging")
+	//fmt.Println(customerPaging)
+
 }

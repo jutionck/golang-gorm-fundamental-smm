@@ -3,6 +3,7 @@ package repository
 import (
 	"enigmacamp.com/golang-gorm/model"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -22,17 +23,27 @@ type customerRepository struct {
 	db *gorm.DB
 }
 
-func (c *customerRepository) Count(groupBy string) (int, error) {
-	var total int
-	result := c.db.Model(&model.Customer{}).Select("count(*)").Group(groupBy).First(&total)
-	if err := result.Error; err != nil {
-		return 0, err
+func (c *customerRepository) Count(result interface{}, groupBy string) error {
+	sqlStmt := c.db.Model(&model.Customer{}).Unscoped()
+	var res *gorm.DB
+	if groupBy == "" {
+		t, ok := result.(*int64) // casting: interface{} to *int64
+		if ok {
+			res = sqlStmt.Count(t)
+		} else {
+			return errors.New("must be int64") // custom error
+		}
+	} else {
+		res = sqlStmt.Select(fmt.Sprintf("%s,%s", groupBy, "count(*) as total")).Group(groupBy).Find(result)
 	}
-	return total, nil
+	if err := res.Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *customerRepository) GroupBy(result interface{}, selectedBy string, whereBy map[string]interface{}, groupBy string) error {
-	res := c.db.Model(&model.Customer{}).Select(selectedBy).Where(whereBy).Group(groupBy).Find(result)
+	res := c.db.Model(&model.Customer{}).Unscoped().Select(selectedBy).Where(whereBy).Group(groupBy).Find(result)
 	if err := res.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
@@ -46,7 +57,7 @@ func (c *customerRepository) GroupBy(result interface{}, selectedBy string, wher
 func (c *customerRepository) Paging(page int, itemPerPage int) (interface{}, error) {
 	var customers []model.Customer
 	offset := itemPerPage * (page - 1)
-	res := c.db.Order("created_at").Limit(itemPerPage).Offset(offset).Find(&customers)
+	res := c.db.Unscoped().Order("created_at").Limit(itemPerPage).Offset(offset).Find(&customers)
 	if err := res.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
