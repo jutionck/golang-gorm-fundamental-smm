@@ -12,12 +12,12 @@ type CustomerRepository interface {
 	Update(customer *model.Customer, by map[string]interface{}) error
 	UpdateBy(existingCustomer *model.Customer) error
 	Delete(customer *model.Customer) error
+	UpdateByModel(payload *model.Customer) error
 	FindById(id string) (model.Customer, error)
 	FindFirstBy(by map[string]interface{}) (model.Customer, error)   // where column = ? limit 1
 	FindAllBy(by map[string]interface{}) ([]model.Customer, error)   // where column = ?
 	FindBy(by string, vals ...interface{}) ([]model.Customer, error) // where column like ?
 	FindFirstWithPreload(by map[string]interface{}, preload string) (model.Customer, error)
-	OpenProductForExistingCustomer(customerWithProduct *model.Customer) error
 	BaseRepositoryAggregation
 	BaseRepositoryPaging
 }
@@ -26,8 +26,8 @@ type customerRepository struct {
 	db *gorm.DB
 }
 
-func (c *customerRepository) OpenProductForExistingCustomer(customerWithProduct *model.Customer) error {
-	result := c.db.Model(&customerWithProduct).Updates(customerWithProduct).Error
+func (c *customerRepository) UpdateByModel(payload *model.Customer) error {
+	result := c.db.Model(&payload).Updates(payload).Error
 	return result
 }
 
