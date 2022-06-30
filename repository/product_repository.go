@@ -9,10 +9,24 @@ import (
 type ProductRepository interface {
 	Create(product *model.Product) error
 	FindById(id uint) (model.Product, error)
+	FindAll() ([]model.Product, error)
 }
 
 type productRepository struct {
 	db *gorm.DB
+}
+
+func (p *productRepository) FindAll() ([]model.Product, error) {
+	var products []model.Product
+	result := p.db.Find(&products)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	return products, nil
 }
 
 func (p *productRepository) FindById(id uint) (model.Product, error) {
