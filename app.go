@@ -4,7 +4,8 @@ import (
 	"enigmacamp.com/golang-gorm/config"
 	"enigmacamp.com/golang-gorm/model"
 	"enigmacamp.com/golang-gorm/repository"
-	"fmt"
+	"enigmacamp.com/golang-gorm/utils"
+	generateid "github.com/jutionck/generate-id"
 	"log"
 )
 
@@ -17,67 +18,39 @@ func main() {
 			log.Println(err.Error())
 		}
 	}(&cfg)
-	productRepo := repository.NewProductRepository(db)
+	//productRepo := repository.NewProductRepository(db)
 	customerRepo := repository.NewCustomerRepository(db)
-	//
-	//product01 := []model.Product{
-	//	{
-	//		ProductName: "Kacang Asin",
-	//	},
-	//	{
-	//		ProductName: "Keripik Mangga",
-	//	},
-	//	{
-	//		ProductName: "Keripik Pisang",
-	//	},
-	//}
-	//err := productRepo.Create(&product01[2])
-	//IsError(err)
 
-	//passwordHash, _ := utils.HashPassword("password")
-	//customer01 := model.Customer{
-	//	Id:   generateid.GenerateId(),
-	//	Name: "Bulan Bintang",
-	//	Address: []model.Address{
-	//		{
-	//			StreetName: "Jl Jalan Aja",
-	//			City:       "Ragunan",
-	//			PostalCode: "12345",
-	//		},
-	//	},
-	//	Phone:   "102030",
-	//	Email:   "bulan.bintang@gmail.com",
-	//	Balance: 10000,
-	//	UserCredential: model.UserCredential{
-	//		UserName: "bulanbintang",
-	//		Password: passwordHash,
-	//	},
-	//}
-	//err := customerRepo.Create(&customer01)
-	//IsError(err)
-
-	// Save Many To Many
-	product01, err := productRepo.FindById(2)
-	product02, _ := productRepo.FindById(3)
-	product03, _ := productRepo.FindById(4)
-	customer01, err := customerRepo.FindById("8dad3fac-4c6e-4e9a-9053-7c93f9806cd1")
-	IsError(err)
-	fmt.Println(product01.ToString())
-
-	err = customerRepo.OpenProductForExistingCustomer(&model.Customer{
-		Id: customer01.Id,
-		Products: []model.Product{
+	// Case 1:
+	// Membuat customer baru sekaligus product baru
+	pwd, _ := utils.HashPassword("password")
+	customer01 := model.Customer{
+		Id:   generateid.GenerateId(),
+		Name: "Bulan Bintang",
+		Address: []model.Address{
 			{
-				ID: product01.ID,
-			},
-			{
-				ID: product02.ID,
-			},
-			{
-				ID: product03.ID,
+				StreetName: "Jl Jalan Aja",
+				City:       "Ragunan",
+				PostalCode: "12345",
 			},
 		},
-	})
+		Phone:   "102030",
+		Email:   "bulan.bintang@gmail.com",
+		Balance: 10000,
+		UserCredential: model.UserCredential{
+			UserName: "bulanbintang",
+			Password: pwd,
+		},
+		Products: []*model.Product{
+			{
+				ProductName: "Caca Marica",
+			},
+			{
+				ProductName: "Beng Beng",
+			},
+		},
+	}
+	err := customerRepo.Create(&customer01)
 	IsError(err)
 
 }

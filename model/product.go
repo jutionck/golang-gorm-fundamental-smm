@@ -6,9 +6,8 @@ import (
 )
 
 type Product struct {
-	ID          uint       `gorm:"column:id;primaryKey"`
-	ProductName string     `gorm:"column:name;not null"`
-	Customers   []Customer `gorm:"many2many:customer_products"`
+	ProductName string      `gorm:"column:name;not null"`
+	Customers   []*Customer `gorm:"many2many:customer_with_products"`
 	gorm.Model
 }
 
